@@ -1,0 +1,67 @@
+# Defines the project name (group of containers).
+# This name will be used as a prefix for networks and volumes.
+name: "discord-starterkit"
+
+services:
+  discordbot:
+    # --- Image and Container Configuration ---
+    image: starterkit/discordbot
+
+    # Container Name: Defines a static name for the running container.
+    container_name: starterkit-discordbot
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    # --- Build Configuration ---
+    build:
+      # The 'context' points to our service's directory, relative
+      # to the location of this docker-compose.yml file.
+      context: ./discordbot
+      
+
+    # --- Environment Configuration ---
+    # The .env file must be inside the service's folder.
+    env_file:
+      - ./discordbot/.env
+
+    # --- Restart Policy ---
+    restart: unless-stopped
+
+    # --- Healthcheck ---
+    healthcheck:
+      test: ["CMD-SHELL", "/app/healthcheck || kill 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  postgres:
+    # --- Image and Container Configuration ---
+    image: postgres:18-trixie
+    container_name: starterkit-postgres
+    restart: unless-stopped
+
+    # --- Environment Configuration ---
+    env_file:
+      - ./postgres/.env
+
+    # --- Storage ---
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+    # --- Networking ---
+    ports:
+      - "5432:5432"
+
+    # --- Healthcheck ---
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || kill 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+    driver: local

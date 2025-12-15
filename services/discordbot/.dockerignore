@@ -1,0 +1,12 @@
+# 1. Ignore
+*
+
+# 2. Accept
+!cmd/
+!cmd/**
+!internal/
+!internal/**
+!assets/
+!assets/**
+!go.mod
+!go.sum

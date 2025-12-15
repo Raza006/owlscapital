@@ -1,0 +1,54 @@
+# ============================================
+# DISCORD BOT CONFIGURATION
+# ============================================
+# Copy this file to services/discordbot/.env
+# and fill in your actual values
+# ============================================
+
+# Required: Your Discord Bot Token
+# Get it from: https://discord.com/developers/applications
+# Go to: Your App → Bot → Reset Token
+BOT_TOKEN=your_discord_bot_token_here
+
+# Optional but Recommended: Your Discord Guild (Server) ID
+# Get it by: Enable Developer Mode in Discord → Right-click server → Copy Server ID
+# If not set, commands will be registered globally (takes up to 1 hour to propagate)
+GUILD_ID=your_guild_id_here
+
+# Optional: Enable default intents if features don't specify them
+# Options: true, false, 1, 0, yes, no, on, off
+DEFAULT_INTENTS=true
+
+# ============================================
+# OPENAI CONFIGURATION (for AI Feature)
+# ============================================
+
+# Required: Your OpenAI API Key
+# Get it from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional: Prefix for AI commands (default: "!")
+# The character(s) users type before their message to trigger the AI
+AI_PREFIX=!
+
+# Optional: System prompt that defines AI personality (default shown below)
+# Customize this to change how the AI behaves
+AI_SYSTEM_PROMPT=You are a helpful Discord bot assistant.
+
+# ============================================
+# EXAMPLES OF CUSTOM CONFIGURATIONS
+# ============================================
+
+# Example 1: Coding Assistant
+# AI_SYSTEM_PROMPT=You are an expert coding assistant. You provide clear, concise code examples and explanations. You specialize in Python, JavaScript, and Go.
+
+# Example 2: Friendly Community Bot
+# AI_SYSTEM_PROMPT=You are a friendly and welcoming community assistant. You help members feel at home and answer questions in a warm, approachable way.
+
+# Example 3: Professional Support Bot
+# AI_SYSTEM_PROMPT=You are a professional customer support assistant. You are patient, understanding, and always strive to resolve issues efficiently.
+
+# Example 4: Different Prefix
+# AI_PREFIX=?
+# Now users would type: ?hello instead of !hello
+

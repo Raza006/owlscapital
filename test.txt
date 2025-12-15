@@ -1,0 +1,147 @@
+		case *discordgo.Ready:
+			eventName = "Ready"
+		case *discordgo.Resumed:
+			eventName = "Resumed"
+		case *discordgo.ChannelCreate:
+			eventName = "ChannelCreate"
+		case *discordgo.ChannelUpdate:
+			eventName = "ChannelUpdate"
+		case *discordgo.ChannelDelete:
+			eventName = "ChannelDelete"
+		case *discordgo.ChannelPinsUpdate:
+			eventName = "ChannelPinsUpdate"
+		case *discordgo.ThreadCreate:
+			eventName = "ThreadCreate"
+		case *discordgo.ThreadUpdate:
+			eventName = "ThreadUpdate"
+		case *discordgo.ThreadDelete:
+			eventName = "ThreadDelete"
+		case *discordgo.ThreadListSync:
+			eventName = "ThreadListSync"
+		case *discordgo.ThreadMemberUpdate:
+			eventName = "ThreadMemberUpdate"
+		case *discordgo.ThreadMembersUpdate:
+			eventName = "ThreadMembersUpdate"
+		case *discordgo.GuildCreate:
+			eventName = "GuildCreate"
+		case *discordgo.GuildUpdate:
+			eventName = "GuildUpdate"
+		case *discordgo.GuildDelete:
+			eventName = "GuildDelete"
+		case *discordgo.GuildBanAdd:
+			eventName = "GuildBanAdd"
+		case *discordgo.GuildBanRemove:
+			eventName = "GuildBanRemove"
+		case *discordgo.GuildMemberAdd:
+			eventName = "GuildMemberAdd"
+		case *discordgo.GuildMemberUpdate:
+			eventName = "GuildMemberUpdate"
+		case *discordgo.GuildMemberRemove:
+			eventName = "GuildMemberRemove"
+		case *discordgo.GuildRoleCreate:
+			eventName = "GuildRoleCreate"
+		case *discordgo.GuildRoleUpdate:
+			eventName = "GuildRoleUpdate"
+		case *discordgo.GuildRoleDelete:
+			eventName = "GuildRoleDelete"
+		case *discordgo.GuildEmojisUpdate:
+			eventName = "GuildEmojisUpdate"
+		case *discordgo.GuildStickersUpdate:
+			eventName = "GuildStickersUpdate"
+		case *discordgo.GuildMembersChunk:
+			eventName = "GuildMembersChunk"
+		case *discordgo.GuildIntegrationsUpdate:
+			eventName = "GuildIntegrationsUpdate"
+		case *discordgo.StageInstanceEventCreate:
+			eventName = "StageInstanceEventCreate"
+		case *discordgo.StageInstanceEventUpdate:
+			eventName = "StageInstanceEventUpdate"
+		case *discordgo.StageInstanceEventDelete:
+			eventName = "StageInstanceEventDelete"
+		case *discordgo.GuildScheduledEventCreate:
+			eventName = "GuildScheduledEventCreate"
+		case *discordgo.GuildScheduledEventUpdate:
+			eventName = "GuildScheduledEventUpdate"
+		case *discordgo.GuildScheduledEventDelete:
+			eventName = "GuildScheduledEventDelete"
+		case *discordgo.GuildScheduledEventUserAdd:
+			eventName = "GuildScheduledEventUserAdd"
+		case *discordgo.GuildScheduledEventUserRemove:
+			eventName = "GuildScheduledEventUserRemove"
+		case *discordgo.IntegrationCreate:
+			eventName = "IntegrationCreate"
+		case *discordgo.IntegrationUpdate:
+			eventName = "IntegrationUpdate"
+		case *discordgo.IntegrationDelete:
+			eventName = "IntegrationDelete"
+		case *discordgo.MessageCreate:
+			eventName = "MessageCreate"
+		case *discordgo.MessageUpdate:
+			eventName = "MessageUpdate"
+		case *discordgo.MessageDelete:
+			eventName = "MessageDelete"
+		case *discordgo.MessageDeleteBulk:
+			eventName = "MessageDeleteBulk"
+		case *discordgo.MessageReactionAdd:
+			eventName = "MessageReactionAdd"
+		case *discordgo.MessageReactionRemove:
+			eventName = "MessageReactionRemove"
+		case *discordgo.MessageReactionRemoveAll:
+			eventName = "MessageReactionRemoveAll"
+		case *discordgo.PresenceUpdate:
+			eventName = "PresenceUpdate"
+		case *discordgo.PresencesReplace:
+			eventName = "PresencesReplace"
+		case *discordgo.TypingStart:
+			eventName = "TypingStart"
+		case *discordgo.UserUpdate:
+			eventName = "UserUpdate"
+		case *discordgo.VoiceServerUpdate:
+			eventName = "VoiceServerUpdate"
+		case *discordgo.VoiceStateUpdate:
+			eventName = "VoiceStateUpdate"
+		case *discordgo.WebhooksUpdate:
+			eventName = "WebhooksUpdate"
+		case *discordgo.InviteCreate:
+			eventName = "InviteCreate"
+		case *discordgo.InviteDelete:
+			eventName = "InviteDelete"
+		case *discordgo.ApplicationCommandPermissionsUpdate:
+			eventName = "ApplicationCommandPermissionsUpdate"
+		case *discordgo.AutoModerationRuleCreate:
+			eventName = "AutoModerationRuleCreate"
+		case *discordgo.AutoModerationRuleUpdate:
+			eventName = "AutoModerationRuleUpdate"
+		case *discordgo.AutoModerationRuleDelete:
+			eventName = "AutoModerationRuleDelete"
+		case *discordgo.AutoModerationActionExecution:
+			eventName = "AutoModerationActionExecution"
+		case *discordgo.GuildAuditLogEntryCreate:
+			eventName = "GuildAuditLogEntryCreate"
+		case *discordgo.MessagePollVoteAdd:
+			eventName = "MessagePollVoteAdd"
+		case *discordgo.MessagePollVoteRemove:
+			eventName = "MessagePollVoteRemove"
+		case *discordgo.EntitlementCreate:
+			eventName = "EntitlementCreate"
+		case *discordgo.EntitlementUpdate:
+			eventName = "EntitlementUpdate"
+		case *discordgo.EntitlementDelete:
+			eventName = "EntitlementDelete"
+		case *discordgo.SubscriptionCreate:
+			eventName = "SubscriptionCreate"
+		case *discordgo.SubscriptionUpdate:
+			eventName = "SubscriptionUpdate"
+		case *discordgo.SubscriptionDelete:
+			eventName = "SubscriptionDelete"
+
+		// Eventos internos do DiscordGo. Geralmente não é necessário manipulá-los diretamente,
+		// mas são incluídos para garantir que o dispatcher conheça todos os tipos de eventos.
+		case *discordgo.Connect:
+			eventName = "Connect"
+		case *discordgo.Disconnect:
+			eventName = "Disconnect"
+		case *discordgo.Event:
+			eventName = "Event"
+		case *discordgo.RateLimit:
+			eventName = "RateLimit"
