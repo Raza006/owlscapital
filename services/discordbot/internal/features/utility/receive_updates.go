@@ -11,11 +11,12 @@ import (
 
 const (
 	receiveUpdatesCommandName = "receive-updates"
-	receiveUpdatesButtonID    = "ReceiveUpdates:Subscribe"
 	updatesRoleID             = "1449854473013821470"
+	updatesEmojiName          = "owlsnoti"
+	updatesEmojiID            = "1449215977068691576"
 )
 
-// ReceiveUpdatesFeature manages the /receive-updates command and role assignment.
+// ReceiveUpdatesFeature manages the /receive-updates command and role assignment via reactions.
 type ReceiveUpdatesFeature struct {
 	bot.BaseFeature
 	binding bot.CommandBinding
@@ -41,7 +42,7 @@ func (f *ReceiveUpdatesFeature) getBinding() bot.CommandBinding {
 	if f.binding.Spec.Command == nil {
 		f.binding = bot.NewSlashCommandBinding(
 			receiveUpdatesCommandName,
-			"Subscribe to receive updates by clicking the button",
+			"Post the updates notification panel",
 			bot.ScopeGuild,
 			f.handleReceiveUpdatesCommand,
 			true,
@@ -61,113 +62,94 @@ func (f *ReceiveUpdatesFeature) ApplicationCommandHandlers() bot.InteractionHand
 	return f.getBinding().AppCommandHandlers
 }
 
-// ComponentHandlers returns the button click handlers.
-func (f *ReceiveUpdatesFeature) ComponentHandlers() bot.InteractionHandlersMap {
-	return bot.InteractionHandlersMap{
-		receiveUpdatesButtonID: f.handleSubscribeButton,
+// EventHandlers returns the event handlers for reaction events.
+func (f *ReceiveUpdatesFeature) EventHandlers() map[string]interface{} {
+	return map[string]interface{}{
+		"MESSAGE_REACTION_ADD":    f.handleReactionAdd,
+		"MESSAGE_REACTION_REMOVE": f.handleReactionRemove,
 	}
 }
 
 // Intents returns the required Discord gateway intents.
 func (f *ReceiveUpdatesFeature) Intents() discordgo.Intent {
-	return discordgo.IntentGuilds | discordgo.IntentGuildMembers
+	return discordgo.IntentGuilds | discordgo.IntentGuildMembers | discordgo.IntentGuildMessageReactions
 }
 
 // handleReceiveUpdatesCommand handles the /receive-updates slash command.
 func (f *ReceiveUpdatesFeature) handleReceiveUpdatesCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	embed := &discordgo.MessageEmbed{
-		Title:       "📢 Receive Updates",
-		Description: "Click the button below to get notified about important updates!",
-		Color:       0x5865F2, // Discord Blurple
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   "What you'll receive:",
-				Value:  "• Important announcements\n• Feature updates\n• Community news",
-				Inline: false,
-			},
-		},
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: "You can unsubscribe at any time by clicking the button again",
-		},
-	}
-
-	button := discordgo.Button{
-		Label:    "🔔 Subscribe to Updates",
-		Style:    discordgo.PrimaryButton,
-		CustomID: receiveUpdatesButtonID,
-	}
-
+	// Send ephemeral response to the command executor
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-			Components: []discordgo.MessageComponent{
-				discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{button},
-				},
-			},
+			Content: "✅ Updates panel posted!",
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
-
 	if err != nil {
 		log.Printf("Error responding to /receive-updates command: %v", err)
-	}
-}
-
-// handleSubscribeButton handles when a user clicks the subscribe button.
-func (f *ReceiveUpdatesFeature) handleSubscribeButton(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	// Defer the response to avoid timeout
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Flags: discordgo.MessageFlagsEphemeral,
-		},
-	})
-	if err != nil {
-		log.Printf("Error deferring interaction: %v", err)
 		return
 	}
 
-	guildID := i.GuildID
-	userID := i.Member.User.ID
-
-	// Check if user already has the role
-	hasRole := false
-	for _, roleID := range i.Member.Roles {
-		if roleID == updatesRoleID {
-			hasRole = true
-			break
-		}
+	// Create the embed with no color
+	embed := &discordgo.MessageEmbed{
+		Description: fmt.Sprintf("React with <:owlsnoti:1449215977068691576> to get access to https://discord.com/channels/718624848812834903/1449226651064991806 so you can be notified for all alerts in the Observatory."),
 	}
 
-	var responseMessage string
-
-	if hasRole {
-		// Remove the role if they already have it (toggle behavior)
-		err = s.GuildMemberRoleRemove(guildID, userID, updatesRoleID)
-		if err != nil {
-			log.Printf("Error removing role from user %s: %v", userID, err)
-			responseMessage = "❌ Failed to unsubscribe from updates. Please try again or contact an admin."
-		} else {
-			responseMessage = "✅ You've been unsubscribed from updates. Click the button again if you change your mind!"
-		}
-	} else {
-		// Add the role
-		err = s.GuildMemberRoleAdd(guildID, userID, updatesRoleID)
-		if err != nil {
-			log.Printf("Error adding role to user %s: %v", userID, err)
-			responseMessage = "❌ Failed to subscribe to updates. Please try again or contact an admin."
-		} else {
-			responseMessage = fmt.Sprintf("✅ Success! You now have the <@&%s> role and will receive updates!", updatesRoleID)
-		}
-	}
-
-	// Follow-up with the response
-	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
-		Content: &responseMessage,
-	})
+	// Send the message as the bot (not showing who executed the command)
+	msg, err := s.ChannelMessageSendEmbed(i.ChannelID, embed)
 	if err != nil {
-		log.Printf("Error editing interaction response: %v", err)
+		log.Printf("Error sending updates panel message: %v", err)
+		return
 	}
+
+	// Add the custom emoji reaction to the message
+	err = s.MessageReactionAdd(i.ChannelID, msg.ID, fmt.Sprintf("%s:%s", updatesEmojiName, updatesEmojiID))
+	if err != nil {
+		log.Printf("Error adding reaction to message: %v", err)
+	}
+}
+
+// handleReactionAdd handles when a user adds a reaction to subscribe.
+func (f *ReceiveUpdatesFeature) handleReactionAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
+	// Ignore bot reactions
+	if r.UserID == s.State.User.ID {
+		return
+	}
+
+	// Check if it's the correct emoji
+	if r.Emoji.Name != updatesEmojiName || r.Emoji.ID != updatesEmojiID {
+		return
+	}
+
+	// Add the role to the user
+	err := s.GuildMemberRoleAdd(r.GuildID, r.UserID, updatesRoleID)
+	if err != nil {
+		log.Printf("Error adding role to user %s: %v", r.UserID, err)
+		return
+	}
+
+	log.Printf("Added updates role to user %s", r.UserID)
+}
+
+// handleReactionRemove handles when a user removes their reaction to unsubscribe.
+func (f *ReceiveUpdatesFeature) handleReactionRemove(s *discordgo.Session, r *discordgo.MessageReactionRemove) {
+	// Ignore bot reactions
+	if r.UserID == s.State.User.ID {
+		return
+	}
+
+	// Check if it's the correct emoji
+	if r.Emoji.Name != updatesEmojiName || r.Emoji.ID != updatesEmojiID {
+		return
+	}
+
+	// Remove the role from the user
+	err := s.GuildMemberRoleRemove(r.GuildID, r.UserID, updatesRoleID)
+	if err != nil {
+		log.Printf("Error removing role from user %s: %v", r.UserID, err)
+		return
+	}
+
+	log.Printf("Removed updates role from user %s", r.UserID)
 }
 
