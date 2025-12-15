@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"projectdiscord/services/discordbot/internal/adapters/db"
 	"projectdiscord/services/discordbot/internal/bot"
 
 	"github.com/bwmarrin/discordgo"
@@ -18,7 +19,7 @@ import (
 var activeFeatures = bot.RegisteredFeatures()
 
 func main() {
-	log.Println("Starting Starter Kit bot...")
+	log.Println("🦉 Starting Owls Capital Discord Bot...")
 
 	// Load configuration from environment variables
 	cfg, err := bot.LoadConfig()
@@ -28,6 +29,18 @@ func main() {
 	if cfg.GuildID == "" {
 		log.Println("Warning: GUILD_ID is empty. Commands will be registered globally and may take up to 1 hour to propagate.")
 	}
+
+	// Initialize database connection
+	log.Println("📦 Connecting to PostgreSQL database...")
+	if err := db.Connect(); err != nil {
+		log.Fatalf("❌ Failed to connect to database: %v", err)
+	}
+
+	// Run auto-migrations to create/update tables
+	if err := db.AutoMigrate(); err != nil {
+		log.Fatalf("❌ Failed to migrate database: %v", err)
+	}
+	log.Println("✅ Database ready!")
 
 	// Load all active features and build the registry of handlers and commands
 	registry := bot.LoadFeatures(activeFeatures)
