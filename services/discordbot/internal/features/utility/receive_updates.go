@@ -3,6 +3,7 @@ package utility
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"projectdiscord/services/discordbot/internal/bot"
 
@@ -62,17 +63,31 @@ func (f *ReceiveUpdatesFeature) ApplicationCommandHandlers() bot.InteractionHand
 	return f.getBinding().AppCommandHandlers
 }
 
-// EventHandlers returns the event handlers for reaction events.
-func (f *ReceiveUpdatesFeature) EventHandlers() map[string]interface{} {
-	return map[string]interface{}{
-		"MESSAGE_REACTION_ADD":    f.handleReactionAdd,
-		"MESSAGE_REACTION_REMOVE": f.handleReactionRemove,
+// TypedEventHandlers returns the event handlers for reaction events.
+func (f *ReceiveUpdatesFeature) TypedEventHandlers() bot.TypedEventHandlersMap {
+	return bot.TypedEventHandlersMap{
+		reflect.TypeOf((*discordgo.MessageReactionAdd)(nil)).Elem():    {f.wrapReactionAdd},
+		reflect.TypeOf((*discordgo.MessageReactionRemove)(nil)).Elem(): {f.wrapReactionRemove},
 	}
 }
 
 // Intents returns the required Discord gateway intents.
 func (f *ReceiveUpdatesFeature) Intents() discordgo.Intent {
 	return discordgo.IntentGuilds | discordgo.IntentGuildMembers | discordgo.IntentGuildMessageReactions
+}
+
+// wrapReactionAdd wraps the typed handler for the event dispatcher.
+func (f *ReceiveUpdatesFeature) wrapReactionAdd(s *discordgo.Session, v interface{}) {
+	if r, ok := v.(*discordgo.MessageReactionAdd); ok {
+		f.handleReactionAdd(s, r)
+	}
+}
+
+// wrapReactionRemove wraps the typed handler for the event dispatcher.
+func (f *ReceiveUpdatesFeature) wrapReactionRemove(s *discordgo.Session, v interface{}) {
+	if r, ok := v.(*discordgo.MessageReactionRemove); ok {
+		f.handleReactionRemove(s, r)
+	}
 }
 
 // handleReceiveUpdatesCommand handles the /receive-updates slash command.
@@ -125,10 +140,28 @@ func (f *ReceiveUpdatesFeature) handleReactionAdd(s *discordgo.Session, r *disco
 	err := s.GuildMemberRoleAdd(r.GuildID, r.UserID, updatesRoleID)
 	if err != nil {
 		log.Printf("Error adding role to user %s: %v", r.UserID, err)
+		
+		// Try to DM the user about the error
+		channel, dmErr := s.UserChannelCreate(r.UserID)
+		if dmErr == nil {
+			s.ChannelMessageSend(channel.ID, "❌ Failed to add the updates role. Please contact an administrator.")
+		}
 		return
 	}
 
 	log.Printf("Added updates role to user %s", r.UserID)
+
+	// Send DM confirmation
+	channel, err := s.UserChannelCreate(r.UserID)
+	if err != nil {
+		log.Printf("Error creating DM channel for user %s: %v", r.UserID, err)
+		return
+	}
+
+	_, err = s.ChannelMessageSend(channel.ID, fmt.Sprintf("✅ You now have the <@&%s> role! You'll receive notifications for all alerts in the Observatory.", updatesRoleID))
+	if err != nil {
+		log.Printf("Error sending DM to user %s: %v", r.UserID, err)
+	}
 }
 
 // handleReactionRemove handles when a user removes their reaction to unsubscribe.
@@ -147,9 +180,27 @@ func (f *ReceiveUpdatesFeature) handleReactionRemove(s *discordgo.Session, r *di
 	err := s.GuildMemberRoleRemove(r.GuildID, r.UserID, updatesRoleID)
 	if err != nil {
 		log.Printf("Error removing role from user %s: %v", r.UserID, err)
+		
+		// Try to DM the user about the error
+		channel, dmErr := s.UserChannelCreate(r.UserID)
+		if dmErr == nil {
+			s.ChannelMessageSend(channel.ID, "❌ Failed to remove the updates role. Please contact an administrator.")
+		}
 		return
 	}
 
 	log.Printf("Removed updates role from user %s", r.UserID)
+
+	// Send DM confirmation
+	channel, err := s.UserChannelCreate(r.UserID)
+	if err != nil {
+		log.Printf("Error creating DM channel for user %s: %v", r.UserID, err)
+		return
+	}
+
+	_, err = s.ChannelMessageSend(channel.ID, "✅ You've been unsubscribed from Observatory updates. React again if you change your mind!")
+	if err != nil {
+		log.Printf("Error sending DM to user %s: %v", r.UserID, err)
+	}
 }
 
