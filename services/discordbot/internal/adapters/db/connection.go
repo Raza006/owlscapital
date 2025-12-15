@@ -16,14 +16,26 @@ var DB *gorm.DB
 
 // Connect initializes the database connection
 func Connect() error {
-	host := getEnv("POSTGRES_HOST", "postgres")
-	port := getEnv("POSTGRES_PORT", "5432")
-	user := getEnv("POSTGRES_USER", "postgres")
-	password := getEnv("POSTGRES_PASSWORD", "")
-	dbname := getEnv("POSTGRES_DB", "owlscapital")
+	var dsn string
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		host, user, password, dbname, port)
+	// Try to use DATABASE_URL first (Railway and production environments)
+	dsn = os.Getenv("DATABASE_URL")
+
+	// Fallback to individual environment variables for local development
+	if dsn == "" {
+		host := getEnv("POSTGRES_HOST", "postgres")
+		port := getEnv("POSTGRES_PORT", "5432")
+		user := getEnv("POSTGRES_USER", "postgres")
+		password := getEnv("POSTGRES_PASSWORD", "")
+		dbname := getEnv("POSTGRES_DB", "owlscapital")
+
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+			host, user, password, dbname, port)
+	}
+
+	if dsn == "" {
+		return fmt.Errorf("no database connection string provided (set DATABASE_URL or individual POSTGRES_* variables)")
+	}
 
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
