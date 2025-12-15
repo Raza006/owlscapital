@@ -1,0 +1,48 @@
+# Git files
+.git
+.gitignore
+
+# Documentation
+*.md
+README.md
+docs/
+
+# Development files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# Test files
+*_test.go
+test.txt
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (if any)
+node_modules/
+
+# Postgres service (not needed for bot build)
+services/postgres/
+
+# Cursor files
+.cursor/
+.cursorignore
+
