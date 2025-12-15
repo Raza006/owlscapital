@@ -135,8 +135,10 @@ The bot uses **GORM AutoMigrate** to automatically create and update database ta
 ### Features
 
 - `/ping` - Check bot latency
-- Support panel system
+- `/receive-updates` - Subscribe to updates with a click of a button
+- Support panel system with ticket management
 - Event logging
+- Auto-migration database system
 - And more...
 
 ### Tech Stack
